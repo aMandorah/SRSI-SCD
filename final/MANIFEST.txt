@@ -1,0 +1,39 @@
+Runtime assets for final/scd_final_step4_yolo.ipynb and final/scd_yolo_pipeline
+Recorded 2026-08-06. Binary checkpoints and data are intentionally excluded from Git.
+
+CHECKPOINTS PRESENT LOCALLY
+---------------------------
+yolo_seg_finetuned.pt
+  size     6,102,941 bytes
+  md5      3e43d4a08f98bbb3404f69c419224467
+  sha256   c57091e25dc2b90e8bb8310bbbbc2aa829d2cc65c0d10bce4c7acd649be55965
+  role     YOLO11 segmentation and optional morphology classification
+  classes  {0: circular, 1: elongated}
+  imgsz    1024
+
+inceptionv3_best.pt
+  size     97,746,674 bytes
+  sha256   e5b81fec82351d34a05e8f0b4b3afa5da8ac66e11dadef60e1a0bf901b0d1d15
+  role     notebook-compatible cell morphology classifier
+  input    299 x 299
+  source   /ibex/user/mandoraa/runs_scd_final/weights/inceptionv3_best.pt
+
+MODEL METADATA TRACKED IN GIT
+-----------------------------
+best_model.json
+  winner     inceptionv3
+  threshold  0.5044
+  classes    [circular, elongated]
+
+DATA PRESENT LOCALLY
+--------------------
+../data/SCD_Final.zip
+  size       875,789,445 bytes
+  extracted  ../data/scd_final_data/SCD_Final/
+
+NOTES
+-----
+- final/inceptionv3_best.pt.truncated is a preserved copy of the incomplete checkpoint that was
+  replaced. It is not used by the pipeline and is ignored by Git.
+- Obtain checkpoints and data from approved project artifact storage before running the pipeline.
+- The final validated run is exp/exp_006; experiment outputs are intentionally ignored by Git.
