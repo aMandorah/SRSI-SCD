@@ -1,0 +1,75 @@
+# Raw, extracted, and generated data
+/data/
+/datasets/
+
+# Data archives and serialized arrays
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.npy
+*.npz
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+
+# Model weights and deployment binaries
+*.pt
+*.pt.*
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.engine
+*.joblib
+*.bin
+
+# Python environments and package caches
+.venv/
+venv/
+env/
+.uv-cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Notebook, editor, and operating-system state
+.ipynb_checkpoints/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*~
+*.swp
+
+# Training and experiment outputs
+**/exp/exp_*/
+results/
+runs/
+outputs/
+artifacts/
+wandb/
+mlruns/
+lightning_logs/
+checkpoints/
+events.out.tfevents.*
+
+# Logs and scheduler output
+*.log
+slurm-*.out
+slurm-*.err
+
+# Temporary and local configuration
+.env
+.env.*
+!.env.example
+tmp/
+temp/

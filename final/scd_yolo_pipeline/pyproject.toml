@@ -1,0 +1,47 @@
+[project]
+name = "scd-yolo-pipeline"
+version = "0.1.0"
+description = "Reproducible two-stage sickle-cell segmentation and classification pipeline"
+readme = "README.md"
+authors = [
+    { name = "ahmedbahaj", email = "ahmedomarbahaj@gmail.com" },
+]
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "matplotlib>=3.8,<4",
+    "numpy>=1.26,<2",
+    "opencv-python==4.11.0.86",
+    "pandas>=2.1,<3",
+    "torch==2.1.2",
+    "torchvision==0.16.2",
+    "ultralytics>=8.3,<9",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<10",
+    "ruff>=0.12,<1",
+]
+
+[project.scripts]
+scd-yolo = "scd_yolo_pipeline.cli:main"
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu121" }
+torchvision = { index = "pytorch-cu121" }
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"

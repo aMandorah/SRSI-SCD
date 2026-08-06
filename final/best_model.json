@@ -1,0 +1,21 @@
+{
+  "winner": "inceptionv3",
+  "selected_on": "val macro_f1",
+  "val_macro_f1": 1.0,
+  "test_macro_f1": 0.998630220348641,
+  "test_accuracy": 0.9991922455573505,
+  "test_auc": 0.9999955664325743,
+  "sickle_recall": 1.0,
+  "threshold": 0.5044,
+  "family": "deep",
+  "input_size": 299,
+  "checkpoint": "/ibex/user/mandoraa/runs_scd_final/weights/inceptionv3_best.pt",
+  "classes": [
+    "circular",
+    "elongated"
+  ],
+  "splits_csv": "/ibex/user/mandoraa/runs_scd_final/splits.csv",
+  "feature_backbone": null,
+  "runner_up": "maxvit_t",
+  "margin_over_runner_up": 0.0
+}
