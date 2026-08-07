@@ -112,3 +112,20 @@ The supplied evaluation is useful for pipeline regression, not clinical validati
 One held-out smear is missing a circular-cell mask; the pipeline reports it instead of silently
 treating the class as empty. The Cuba classifier crops also lack smear IDs, so training/evaluation
 overlap cannot be ruled out. A clean external test set is still required before deployment.
+
+
+## Nigerian external cohort
+
+The `external-evaluate` command evaluates the public Nigerian thin-film cohort from University
+College Hospital, Ibadan, using the frozen checkpoints:
+
+~~~bash
+uv run scd-yolo external-evaluate --download --classification-source yolo
+~~~
+
+The release has electrophoresis labels at the sample level, but no public cell masks. The external
+run therefore reports per-field/per-sample elongated-cell burden, YOLO-versus-Inception agreement,
+and AUROC/average precision for SCD status. It does not report cell-level segmentation precision,
+recall, IoU, or morphology accuracy. Raw downloads and extracted data are stored under
+`data/external/nigeria_ucl_scd/`; the immutable experiment contains CSV tables, hashes, exclusions,
+and a deterministic set of stage images.

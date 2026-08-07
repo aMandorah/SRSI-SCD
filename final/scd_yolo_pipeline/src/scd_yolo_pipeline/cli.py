@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import time
 from pathlib import Path
 
@@ -8,6 +9,8 @@ from .artifacts import Experiment, safe_name, save_evaluation_figure, save_stage
 from .config import PipelineConfig
 from .dataset import load_held_out_dataset
 from .evaluation import evaluate_pipeline
+from .external_evaluation import evaluate_nigeria
+from .nigeria import download_nigeria, enumerate_nigeria, write_sample_manifest
 from .pipeline import PipelineResult, SCDPipeline
 
 
@@ -82,6 +85,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Process only the first N held-out smears (useful for smoke tests)",
     )
     evaluate.set_defaults(handler=run_evaluate)
+
+    nigeria = subparsers.add_parser(
+        "external-evaluate",
+        parents=[common],
+        help="Evaluate the Nigerian external cohort",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    nigeria.add_argument("--external-root", type=Path)
+    nigeria.add_argument("--download", action="store_true")
+    nigeria.add_argument("--overwrite-download", action="store_true")
+    nigeria.add_argument("--stage-sample-count", type=_positive_int, default=16)
+    nigeria.add_argument(
+        "--limit-samples", type=_positive_int, help="Process only the first N samples"
+    )
+    nigeria.set_defaults(handler=run_external_evaluate)
     return parser
 
 
@@ -205,6 +223,70 @@ def run_evaluate(args: argparse.Namespace) -> int:
     print("\nDetection:", evaluation.detection)
     print("Classification:", evaluation.classification)
     print("End-to-end:", evaluation.end_to_end)
+    print(f"Experiment: {experiment.path}")
+    return 0
+
+
+def run_external_evaluate(args: argparse.Namespace) -> int:
+    config = _config(args)
+    config.validate_inputs(require_data=False)
+    external_root = (
+        args.external_root or (config.project_root / "data" / "external" / "nigeria_ucl_scd")
+    ).resolve()
+    if args.download:
+        download_nigeria(external_root, overwrite=args.overwrite_download)
+    samples, audit = enumerate_nigeria(external_root)
+    if not samples:
+        raise RuntimeError("No label-matched Nigerian images found")
+    experiment = Experiment.create(config.experiment_root)
+    experiment.write_json(
+        "config.json",
+        {
+            **config.as_json(),
+            "external_dataset": "nigeria_ucl_scd",
+            "external_root": str(external_root),
+        },
+    )
+    write_sample_manifest(experiment.path / "tables" / "nigeria_sample_manifest.csv", samples)
+    pipeline = SCDPipeline(config)
+    if args.limit_samples:
+        samples = samples[: args.limit_samples]
+    stage_ids = {sample.sample_id for sample in samples[: args.stage_sample_count]}
+    stage_artifacts: dict[str, object] = {}
+
+    def on_field(field_index: int, sample: object, image: Path, result: object) -> None:
+        if sample.sample_id not in stage_ids or field_index != 0:
+            return
+        key = f"nigeria_{sample.sample_id}"
+        stage_artifacts[sample.sample_id] = save_stage_images(experiment, result, key)
+
+    evaluation = evaluate_nigeria(pipeline, samples, experiment.path, on_field=on_field)
+    evaluation.fields.to_csv(experiment.path / "tables" / "nigeria_fields.csv", index=False)
+    evaluation.samples.to_csv(experiment.path / "tables" / "nigeria_samples.csv", index=False)
+    evaluation.cells.to_csv(experiment.path / "tables" / "nigeria_cells.csv", index=False)
+    evaluation.excluded.to_csv(experiment.path / "tables" / "nigeria_excluded.csv", index=False)
+    experiment.write_json(
+        "summary.json",
+        {
+            "mode": "external-evaluate",
+            "dataset": {
+                "name": "nigeria_ucl_scd",
+                "audit": audit,
+                "external_root": str(external_root),
+            },
+            "pipeline": pipeline.describe(),
+            "evaluation": evaluation.metrics,
+            "artifacts": {"stage_images": stage_artifacts},
+        },
+    )
+    experiment.complete(
+        {
+            "mode": "external-evaluate",
+            "n_samples": len(evaluation.samples),
+            "n_fields": len(evaluation.fields),
+        }
+    )
+    print(json.dumps(evaluation.metrics, indent=2))
     print(f"Experiment: {experiment.path}")
     return 0
 
