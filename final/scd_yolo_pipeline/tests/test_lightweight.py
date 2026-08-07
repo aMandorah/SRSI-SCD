@@ -3,6 +3,8 @@ from pathlib import Path
 
 from scd_yolo_pipeline.artifacts import Experiment
 from scd_yolo_pipeline.config import PipelineConfig, discover_project_root
+from scd_yolo_pipeline.external_evaluation import _auc, _average_precision
+from scd_yolo_pipeline.nigeria import _family, parse_nigeria_labels
 
 
 def test_discovers_repository_root() -> None:
@@ -38,3 +40,21 @@ def test_experiment_numbers_are_monotonic(tmp_path: Path) -> None:
     assert first.path.name == "exp_000"
     assert second.path.name == "exp_001"
     assert json.loads(first.path.joinpath("run.json").read_text())["status"] == "running"
+
+
+def test_nigeria_label_parser_and_repeat_family(tmp_path: Path) -> None:
+    labels = tmp_path / "labels.txt"
+    labels.write_text("a, 0\na,0\nb, 1\n")
+    parsed, audit = parse_nigeria_labels(labels)
+    assert parsed == {"a": 0, "b": 1}
+    assert audit["duplicate_rows"] == 1
+    assert _family("101017-07r2") == "101017-07"
+
+
+def test_external_metrics_perfect_scores() -> None:
+    import numpy as np
+
+    y = np.array([0, 0, 1, 1])
+    score = np.array([0.1, 0.2, 0.8, 0.9])
+    assert _auc(y, score) == 1.0
+    assert _average_precision(y, score) == 1.0

@@ -73,3 +73,13 @@ available held-out data and uses the same supplied checkpoint. Keep Inception ou
 tables for comparison and future retraining work. Before clinical or production use, repair the
 missing annotation and evaluate on a clean external smear-level split; the supplied data cannot
 establish deployment-grade generalization.
+
+
+## External Nigerian validation
+
+The Nigerian release is an independent thin-blood-film cohort from University College Hospital,
+Ibadan, with sample-level SCD labels obtained by hemoglobin electrophoresis. It is evaluated as an
+external discrimination study. Because the public release does not include cell-level masks or
+circular/elongated cell annotations, its results must not be merged with the Cuban mask-based
+detection metrics. The external report records sample and field counts, elongated burden, classifier
+agreement, AUROC, average precision, clustered bootstrap intervals, and all exclusions.
